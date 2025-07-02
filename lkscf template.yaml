@@ -1,0 +1,186 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Build VPC, Subnet, Route Table, Internet Gateway, NAT Gateway. and
+  Security Group
+
+Resources:
+  Lks2024Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.15.0.0/16
+      Tags:
+        - Key: Name
+          Value: lks-2024-vpc
+
+  LksPublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Lks2024Vpc
+      AvailabilityZone: us-west-2a
+      CidrBlock: 172.15.0.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: lks-public-subnet-a
+
+  LksPublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Lks2024Vpc
+      AvailabilityZone: us-west-2b
+      CidrBlock: 172.15.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: lks-public-subnet-b
+
+  LksPublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Lks2024Vpc
+      AvailabilityZone: us-west-2c
+      CidrBlock: 172.15.2.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: lks-public-subnet-c
+
+  LksPrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Lks2024Vpc
+      AvailabilityZone: us-west-2a
+      CidrBlock: 172.15.3.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: lks-private-subnet-a
+
+  LksPrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Lks2024Vpc
+      AvailabilityZone: us-west-2b
+      CidrBlock: 172.15.4.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: lks-private-subnet-b
+
+  LksPrivateSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Lks2024Vpc
+      AvailabilityZone: us-west-2c
+      CidrBlock: 172.15.5.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: lks-private-subnet-c
+
+  LksInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: lks-inet-gw
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Lks2024Vpc
+      InternetGatewayId: !Ref LksInternetGateway
+
+  LksPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Lks2024Vpc
+      Tags:
+        - Key: Name
+          Value: lks-rtb-public
+
+  LksPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Lks2024Vpc
+      Tags:
+        - Key: Name
+          Value: lks-rtb-private
+
+  SubnetPublicRouteTableAssociationA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref LksPublicRouteTable
+      SubnetId: !Ref LksPublicSubnetA
+
+  SubnetPublicRouteTableAssociationB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref LksPublicRouteTable
+      SubnetId: !Ref LksPublicSubnetB
+
+  SubnetPublicRouteTableAssociationC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref LksPublicRouteTable
+      SubnetId: !Ref LksPublicSubnetC
+
+  SubnetPrivateRouteTableAssociationA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref LksPrivateRouteTable
+      SubnetId: !Ref LksPrivateSubnetA
+
+  SubnetPrivateRouteTableAssociationB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref LksPrivateRouteTable
+      SubnetId: !Ref LksPrivateSubnetB
+
+  SubnetPrivateRouteTableAssociationC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref LksPrivateRouteTable
+      SubnetId: !Ref LksPrivateSubnetC
+
+  LksEIPNatGateway:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  LksNatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      SubnetId: !Ref LksPublicSubnetA
+      Tags:
+        - Key: Name
+          Value: lks-nat-gw
+      AllocationId: !GetAtt LksEIPNatGateway.AllocationId
+
+  LksPrivateRTBRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref LksPrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref LksNatGateway
+
+  LksPublicRTBRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref LksPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref LksInternetGateway
+
+  LksSgDBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: RDS is allow to all private subnets
+      VpcId: !Ref Lks2024Vpc
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: lks-sg-db
