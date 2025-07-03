@@ -1,44 +1,94 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Membuat tiga bucket S3 dengan kebijakan Public Access yang sesuai:
+  - Bucket web (read-only, website hosting)
+  - Bucket firehose (full access)
+  - Bucket model (full access + lifecycle)
+
 Resources:
-  Bucket1:
+  BucketWeb:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: lks-bucketfirehose-kepri-1
+      BucketName: lks-bucketweb-kepulauanriau-1
       WebsiteConfiguration:
         IndexDocument: index.html
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: aws:kms
-              KMSMasterKeyID: alias/aws/s3
       PublicAccessBlockConfiguration:
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
 
-  Bucket2:
+  BucketWebPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BucketWeb
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowPublicReadWeb
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource: !Sub "${BucketWeb.Arn}/*"
+
+  BucketFirehose:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: lks-bucketweb-kepri-1
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: aws:kms
-              KMSMasterKeyID: alias/aws/s3
+      BucketName: lks-bucketfirehose-kepulauanriau-1
       PublicAccessBlockConfiguration:
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      VersioningConfiguration:
-        Status: Enabled
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
 
+  BucketFirehosePolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BucketFirehose
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowPublicFullFirehose
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - "s3:*"
+            Resource:
+              - !Sub "${BucketFirehose.Arn}"
+              - !Sub "${BucketFirehose.Arn}/*"
 
-  Bucket3:
+  BucketModel:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: lks-bucketmodel-kepri-1
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: aws:kms
-              KMSMasterKeyID: alias/aws/s3
+      BucketName: lks-bucketmodel-kepulauanriau-1
       PublicAccessBlockConfiguration:
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
+      LifecycleConfiguration:
+        Rules:
+          - Id: ArchiveThenExpire
+            Status: Enabled
+            # Terapkan ke semua objek; hapus blok Filter jika ingin global
+            Transitions:
+              - TransitionInDays: 30
+                StorageClass: GLACIER
+            ExpirationInDays: 365
+
+  BucketModelPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BucketModel
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowPublicFullModel
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - "s3:*"
+            Resource:
+              - !Sub "${BucketModel.Arn}"
+              - !Sub "${BucketModel.Arn}/*"

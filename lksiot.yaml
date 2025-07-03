@@ -1,12 +1,8 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: Build Iot Core and Policy
-
 Resources:
   Thing:
     Type: AWS::IoT::Thing
     Properties:
       ThingName: lksiot
-
   Policy:
     Type: AWS::IoT::Policy
     Properties:
@@ -15,22 +11,22 @@ Resources:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
-            Action:
+            Action: 
               - iot:Connect
             Resource:
               - '*'
           - Effect: Allow
-            Action:
+            Action: 
               - iot:Publish
             Resource:
-              - '*'       
+              - '*'      
           - Effect: Allow
-            Action:
+            Action: 
               - iot:Receive
             Resource:
-              - '*'       
+              - '*'
           - Effect: Allow
-            Action:
+            Action: 
               - iot:Subscribe
             Resource:
-              - '*'
+              - '*'       

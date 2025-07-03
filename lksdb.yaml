@@ -1,37 +1,29 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: Build Subnet Group and Database Instance
-
 Resources:
-
   DBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: Subnet group untuk database RDS
+      DBSubnetGroupDescription: "subnet group for database"
       SubnetIds:
-        - subnet-01612ac5bf3a3f77b
-        - subnet-0f4eeddaa5100dd39
-        - subnet-0092f4cb9f2fbc388
+        - subnet-02760f4faac06e4cb
+        - subnet-08e34d6eb57988a48
+        - subnet-0d2c48d946342aae3
       Tags:
-        - Key: Name
-          Value: lks-subnet-group-db
-
+        - Key: Naame
+          Value: lks-sg-db
   DBInstance:
     Type: AWS::RDS::DBInstance
     Properties:
-      DBName: lksdb
+      DBName: dbiot
       DBInstanceClass: db.t3.micro
-      AllocatedStorage: 20
+      VPCSecurityGroups:
+        - sg-07e7cde4667e72323
       Engine: mysql
       EngineVersion: 8.0.35
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      PubliclyAccessible: false
+      AllocatedStorage: 20
       MasterUsername: admin
       MasterUserPassword: Lksncc2024!
-      VPCSecurityGroups:
-        - sg-04b85c6b4301c8400
-      PubliclyAccessible: false
-      DBSubnetGroupName: !Ref DBSubnetGroup
-      MultiAZ: false
-      DeletionProtection: false
-      BackupRetentionPeriod: 1
       Tags:
         - Key: Name
-          Value: lksdb
+          Value: dbiot
