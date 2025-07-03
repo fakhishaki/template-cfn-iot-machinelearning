@@ -1,0 +1,11 @@
+Resources:
+  NotebookInstance:
+    Type: AWS::SageMaker::NotebookInstance
+    Properties:
+      RoleArn: arn:aws:iam::056665234171:role/labrole
+      InstanceType: ml.t3.medium
+      NotebookInstanceName: iotml-kepulauanriau
+      PlatformIdentifier: notebook-al2-v2
+      Tags:
+        - Key: Name
+          Value: iotml-kepulauanriau

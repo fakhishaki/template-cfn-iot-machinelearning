@@ -1,0 +1,33 @@
+Resources:
+  TopicRuleDataStream:
+    Type: AWS::IoT::TopicRule
+    Properties:
+      RuleName: lks_datastream_kepulauanriau
+      TopicRulePayload:
+        Sql: "SELECT * FROM 'iot/sensor/kepri'"
+        Description: "Rules for Devices connect to Analytics"
+        RuleDisabled: false
+        Actions:
+          - Kinesis:
+              RoleArn: arn:aws:iam::056665234171:role/labrole
+              StreamName: lksdatastreamiot
+              PartitionKey: "${timestamp()}"
+      Tags:
+        - Key: Name
+          Value: lks_datastream_kepulauanriau
+
+  TopicRuleFirehose:
+    Type: AWS::IoT::TopicRule
+    Properties:
+      RuleName: lks_firehose_kepulauanriau
+      TopicRulePayload:
+        Sql: "SELECT * FROM 'iot/sensor/kepri'"
+        Description: "Rules for Devices connect to Kinesis"
+        RuleDisabled: false
+        Actions:
+          - Firehose:
+              RoleArn: arn:aws:iam::056665234171:role/labrole
+              DeliveryStreamName: LKS-Firehose-2024
+      Tags:
+        - Key: Name
+          Value: lks_firehose_kepulauanriau
