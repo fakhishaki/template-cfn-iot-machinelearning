@@ -92,3 +92,4 @@ Resources:
             Resource:
               - !Sub "${BucketModel.Arn}"
               - !Sub "${BucketModel.Arn}/*"
+  

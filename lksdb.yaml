@@ -4,11 +4,11 @@ Resources:
     Properties:
       DBSubnetGroupDescription: "subnet group for database"
       SubnetIds:
-        - subnet-02760f4faac06e4cb
-        - subnet-08e34d6eb57988a48
-        - subnet-0d2c48d946342aae3
+        - subnet-0514f8dbef09e8fca
+        - subnet-024f66b341b59cf49
+        - subnet-0d92b83469f4c5eb1
       Tags:
-        - Key: Naame
+        - Key: Name
           Value: lks-sg-db
   DBInstance:
     Type: AWS::RDS::DBInstance
@@ -16,7 +16,7 @@ Resources:
       DBName: dbiot
       DBInstanceClass: db.t3.micro
       VPCSecurityGroups:
-        - sg-07e7cde4667e72323
+        - sg-0690224a2400b64c8
       Engine: mysql
       EngineVersion: 8.0.35
       DBSubnetGroupName: !Ref DBSubnetGroup
